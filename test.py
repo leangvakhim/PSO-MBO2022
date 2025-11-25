@@ -15,9 +15,9 @@ from benchmark import (
 
 print("1. Coverage")
 print("2. Benchmark")
-val = input("Enter a values: ")
+val = int(input("Enter a values: "))
 if val == 1:
-    sensor = 40
+    sensor = 50
     area = 50
     radius = 7
     pop_size = 20
@@ -51,15 +51,14 @@ if val == 1:
 
     print(f"Best Coverage Rate: {(1 - best_val) * 100:.2f}")
 
-    # wsn_cov.visualize(best_pos, title="PSO-MBO")
-else:
+    wsn_cov.visualize(best_pos, title="PSO-MBO")
+elif val == 2:
     functions = [
         ('Sphere', sphere, (-100, 100)),
-        ('Rosenbrock', rosenbrock, (-10, 10)),
-        # ('Rastrigin', rastrigin, (-5.12, 5.12)),
+        ('Schwefel 2.22', schwefel_2_22, (-10, 10)),
         ('Schwefel 1.2', schwefel_1_2, (-100, 100)),
         ('Schwefel 2.21', schwefel_2_21, (-100, 100)),
-        ('Schwefel 2.22', schwefel_2_22, (-10, 10)),
+        ('Rosenbrock', rosenbrock, (-10, 10)),
         ('Step', step, (-100, 100)),
         ('Quartic', quartic, (-1.28, 1.28)),
         ('Alpine', alpine, (-10, 100)),

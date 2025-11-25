@@ -107,7 +107,7 @@ class pso_mbo:
                         # levy flight
                         if rand_val > self.bar:
                             dx = 0.05
-                            x_new_mbo[k] = x_new_mbo[k] + (dx * (np.random.rand() - 0.5))
+                            x_new_mbo[k] = x_new_mbo[k] + (dx * (np.random.rand() - 0.05))
 
                 x_new_pso = self.population[original_idx] + self.velocities[original_idx]
 

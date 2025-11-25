@@ -2,10 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class wsn:
-    def __init__(self, n_sensor=50, area_size=100, sensing_radius=10):
+    def __init__(self, n_sensor=50, area_size=100, sensing_radius=10, w1=1.0, w2=0.0, w3=0.0):
         self.n_sensor = n_sensor
         self.area_size = area_size
         self.sensing_radius = sensing_radius
+
+        self.w1 = w1
+        self.w2 = w2
+        self.w3 = w3
 
         self.grid_res = 1.0
         self.grid_w = int(area_size / self.grid_res)
@@ -15,6 +19,8 @@ class wsn:
         y = np.linspace(0, area_size, self.grid_h)
         self.grid_x, self.grid_y = np.meshgrid(x, y)
         self.grid_points = np.column_stack((self.grid_x.ravel(), self.grid_y.ravel()))
+
+        self.node_energy = np.ones(self.n_sensor)
 
     def coverage_objective(self, flat_position):
         sensors = flat_position.reshape((self.n_sensor, 2))
@@ -29,11 +35,29 @@ class wsn:
             mask = dist_sq <= self.sensing_radius**2
             is_covered |= mask
 
-        coverage_rate = np.sum(is_covered) / len(self.grid_points)
+        lambda_cov = np.sum(is_covered) / len(self.grid_points)
 
-        return 1.0 - coverage_rate
+        S1 = self.n_sensor
+        S2 = self.n_sensor
+        theta = S2 / S1
+
+        max_e = np.max(self.node_energy)
+        min_e = np.min(self.node_energy)
+        avg_e = np.mean(self.node_energy)
+
+        if avg_e > 0:
+            eta = (max_e - min_e) / avg_e
+        else:
+            eta = 0.0
+
+        fitness = (self.w1 * lambda_cov) + (self.w2 * theta) + (self.w3 * eta)
+
+        return 1.0 - fitness
 
     def visualize(self, best_solution, title="WSN Coverage"):
+        final_loss = self.coverage_objective(best_solution)
+        final_fitness = 1.0 - final_loss
+
         sensors = best_solution.reshape((self.n_sensor, 2))
 
         fig, ax = plt.subplots(figsize=(8, 8))
@@ -46,12 +70,10 @@ class wsn:
         for sensor in sensors:
             circle = plt.Circle((sensor[0], sensor[1]), self.sensing_radius, color='blue', alpha=0.15, zorder=1)
             ax.add_artist(circle)
-
             circle_outline = plt.Circle((sensor[0], sensor[1]), self.sensing_radius, color='blue', fill=False, alpha=0.5, zorder=2)
             ax.add_artist(circle_outline)
 
-        final_cov = 1.0 - self.coverage_objective(best_solution)
-        plt.title(f"{title}\nCoverage Rate: {final_cov*100:.2f}%")
+        plt.title(f"{title}\nTotal Coverage: {final_fitness:.4f}")
         plt.xlabel("X (m)")
         plt.ylabel("Y (m)")
         plt.legend()
